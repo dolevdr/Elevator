@@ -1,15 +1,6 @@
-.elevator_container{
-    width: 100%;
-    height: 100%;
-    /* margin: 0; */
-}
+
 .el{
+
     width: 20%;
     /* width: 20%; */
-}
-#Red{
-    background-color: red;
-}
-#Green{
-    background-color: green;
 }
