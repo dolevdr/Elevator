@@ -1,0 +1,23 @@
+.floor_container{
+    height: 8vh;
+    position: relative;
+    top:2vh;
+    width: 5%;
+}
+#red, #green{
+    color: white;
+    font-size: 0.7vw;
+
+}
+#red{
+    background-color: red;
+}
+#green{
+    background-color: green;
+    cursor: pointer;
+}
+#arrive{
+    color: green;
+    border: 1px solid green;
+    background-color: white;
+}

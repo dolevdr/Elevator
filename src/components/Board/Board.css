@@ -1,0 +1,21 @@
+.board_container{
+    display: flex;
+}
+table {
+  border-bottom: 1px solid lightgray;
+  border-left: 1px solid lightgray;
+  margin-left: 10%;
+  width: 80vw;
+  height: 80vh;
+}
+tr{
+  position: relative;
+}
+
+td {
+  text-align: center;
+  border-top: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+  width: 20%;
+  height: 10%;
+}
