@@ -45,7 +45,7 @@ const Board = () => {
       
       const interval = setInterval(function () {
         moving(fRef, elevators[minObj.id - 1].ref);
-      }, 100);
+      }, 50);
 
       const moving = (fRef, eRef) => {
         let floor = fRef.current.getBoundingClientRect().top;
