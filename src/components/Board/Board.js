@@ -6,11 +6,11 @@ import { queue } from "../../RequestManager/RequestManager";
 
 const Board = () => {
   const [elevators, setElevators] = useState([
-    { id: 1, available: true, ref: useRef(null) },
-    { id: 2, available: true, ref: useRef(null) },
-    { id: 3, available: true, ref: useRef(null) },
-    { id: 4, available: true, ref: useRef(null) },
-    { id: 5, available: true, ref: useRef(null) },
+    { id: 1, available: true, arrive:false, ref: useRef(null) },
+    { id: 2, available: true, arrive:false, ref: useRef(null) },
+    { id: 3, available: true, arrive:false, ref: useRef(null) },
+    { id: 4, available: true, arrive:false, ref: useRef(null) },
+    { id: 5, available: true, arrive:false, ref: useRef(null) },
   ]);
 
   const [floors, setFloors] = useState([
@@ -59,6 +59,8 @@ const Board = () => {
         let ele = eRef.current.getBoundingClientRect().top;
         if (floor === ele) {
           clearInterval(interval);
+          elevators[eId - 1].arrive = true;
+          setElevators([...elevators]);
           floors[fId - 1].arrive = true;
           setFloors([...floors]);
           setTimeout(() => {
@@ -67,6 +69,7 @@ const Board = () => {
             floors[fId - 1].wait = false;
             setFloors([...floors]);
             elevators[eId - 1].available = true;
+            elevators[eId - 1].arrive = false;
             setElevators([...elevators]);
             if(!queue.isEmpty()){
               const next = queue.dequeue();
@@ -123,7 +126,7 @@ const Board = () => {
                 {elevators.map((eVal, eInd) => (
                   <td key={eInd}>
                     <div ref={eVal.ref}>
-                      <Elevator id={eVal.id} available={eVal.available} />
+                      <Elevator id={eVal.id} available={eVal.available} arrive={eVal.arrive} />
                     </div>
                   </td>
                 ))}

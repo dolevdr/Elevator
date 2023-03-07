@@ -1,9 +1,9 @@
 import "./Elevator.css";
 
 const Elevator = (props) => {
-  const available = props.available;
+  const {available, arrive} = props;
 
-  const style = available ? "#008000" : "#FF0000";
+  const style = available ? "#000000" : (arrive) ? "#008000" : "#FF0000";
   return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
