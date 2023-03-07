@@ -3,6 +3,7 @@
     position: relative;
     top:2vh;
     width: 5%;
+    gap:2%;
 }
 #red, #green{
     color: white;
@@ -20,4 +21,12 @@
     color: green;
     border: 1px solid green;
     background-color: white;
+}
+.numberOfElevators{
+    position: relative;
+    left: 20%;
+    font-size: 0.7vw;
+}
+.float{
+    float: left;
 }

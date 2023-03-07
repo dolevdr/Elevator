@@ -6,24 +6,24 @@ import { queue } from "../../RequestManager/RequestManager";
 
 const Board = () => {
   const [elevators, setElevators] = useState([
-    { id: 1, available: true, arrive:false, ref: useRef(null) },
-    { id: 2, available: true, arrive:false, ref: useRef(null) },
-    { id: 3, available: true, arrive:false, ref: useRef(null) },
-    { id: 4, available: true, arrive:false, ref: useRef(null) },
-    { id: 5, available: true, arrive:false, ref: useRef(null) },
+    { id: 1, available: true, arrive: false, time: null, ref: useRef(null) },
+    { id: 2, available: true, arrive: false, time: null, ref: useRef(null) },
+    { id: 3, available: true, arrive: false, time: null, ref: useRef(null) },
+    { id: 4, available: true, arrive: false, time: null, ref: useRef(null) },
+    { id: 5, available: true, arrive: false, time: null, ref: useRef(null) },
   ]);
 
   const [floors, setFloors] = useState([
-    { id: 1, wait: false, arrive: false },
-    { id: 2, wait: false, arrive: false },
-    { id: 3, wait: false, arrive: false },
-    { id: 4, wait: false, arrive: false },
-    { id: 5, wait: false, arrive: false },
-    { id: 6, wait: false, arrive: false },
-    { id: 7, wait: false, arrive: false },
-    { id: 8, wait: false, arrive: false },
-    { id: 9, wait: false, arrive: false },
-    { id: 10, wait: false, arrive: false },
+    { id: 1, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 2, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 3, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 4, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 5, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 6, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 7, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 8, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 9, wait: false, arrive: false, numOfElevators: -1 },
+    { id: 10, wait: false, arrive: false, numOfElevators: -1 },
   ]);
 
   const findElevator = useCallback(
@@ -32,6 +32,8 @@ const Board = () => {
       let availableElevators = elevators.filter(
         (obj) => obj.available === true
       );
+      floors[fId - 1].numOfElevators =(availableElevators.length>0) ? availableElevators.length: 0;
+      setFloors([...floors]);
       if (availableElevators.length > 0) {
         let n = availableElevators.map((obj) => {
           const eleRect = obj.ref.current.getBoundingClientRect();
@@ -43,13 +45,14 @@ const Board = () => {
       queue.enqueue({ id: fId, ref: floor });
       return null;
     },
-    [elevators]
+    [elevators, floors]
   );
 
   const movingElevator = useCallback(
     (fRef, fId, eId) => {
       elevators[eId - 1].available = false;
       setElevators([...elevators]);
+      let start = Date.now(); //Elevator starts moving
       const interval = setInterval(function () {
         moving(fRef, elevators[eId - 1].ref);
       }, 50);
@@ -60,6 +63,8 @@ const Board = () => {
         if (floor === ele) {
           clearInterval(interval);
           elevators[eId - 1].arrive = true;
+          let end = Date.now(); //Elevator arrived
+          elevators[eId - 1].time = end - start;
           setElevators([...elevators]);
           floors[fId - 1].arrive = true;
           setFloors([...floors]);
@@ -67,11 +72,13 @@ const Board = () => {
             floors[fId - 1].arrive = false;
             setFloors([...floors]);
             floors[fId - 1].wait = false;
+            floors[fId - 1].numOfElevators =-1;
             setFloors([...floors]);
             elevators[eId - 1].available = true;
             elevators[eId - 1].arrive = false;
+            elevators[eId - 1].time = null;
             setElevators([...elevators]);
-            if(!queue.isEmpty()){
+            if (!queue.isEmpty()) {
               const next = queue.dequeue();
               movingElevator(next.ref, next.id, eId);
             }
@@ -98,7 +105,7 @@ const Board = () => {
       //else put current last in queue and take the first in line
       let minObj = null;
       if (queue.isEmpty()) {
-        minObj = findElevator(fRef,fId);
+        minObj = findElevator(fRef, fId);
       } else {
         queue.enqueue({ id: fId, ref: fRef });
       }
@@ -126,7 +133,12 @@ const Board = () => {
                 {elevators.map((eVal, eInd) => (
                   <td key={eInd}>
                     <div ref={eVal.ref}>
-                      <Elevator id={eVal.id} available={eVal.available} arrive={eVal.arrive} />
+                      <Elevator
+                        id={eVal.id}
+                        available={eVal.available}
+                        arrive={eVal.arrive}
+                        time={eVal.time}
+                      />
                     </div>
                   </td>
                 ))}
@@ -141,6 +153,7 @@ const Board = () => {
             <Floor
               id={v.id}
               wait={v.wait}
+              elevators={v.numOfElevators}
               arrive={v.arrive}
               handleCall={handleCall}
             />
