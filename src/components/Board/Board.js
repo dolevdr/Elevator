@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import Elevator from "../Elevator/Elevator";
 import Floor from "../floor/floor";
 import "./Board.css";
+import { queue } from "../../RequestManager/RequestManager";
 
 const Board = () => {
   const [elevators, setElevators] = useState([
@@ -24,27 +25,33 @@ const Board = () => {
     { id: 9, wait: false, arrive: false },
     { id: 10, wait: false, arrive: false },
   ]);
-  const findElevator = useCallback((floor) => {
-    let n = elevators
-      .filter((obj) => obj.available === true)
-      .map((obj) => {
-        const eleRect = obj.ref.current.getBoundingClientRect();
-        const fRect = floor.current.getBoundingClientRect();
-        return { id: obj.id, dist: Math.abs(eleRect.top - fRect.top) };
-      });
-    return n.reduce((p, c) => (p.dist > c.dist ? c : p));
-  }, [elevators]);
 
-  const handleCall = useCallback(
-    (fRef, fId) => {
-      floors[fId - 1].wait = true;
-      setFloors([...floors]);
-      let minObj = findElevator(fRef);
-      elevators[minObj.id - 1].available = false;
+  const findElevator = useCallback(
+    (floor, fId) => {
+      //if nothing available send to queue
+      let availableElevators = elevators.filter(
+        (obj) => obj.available === true
+      );
+      if (availableElevators.length > 0) {
+        let n = availableElevators.map((obj) => {
+          const eleRect = obj.ref.current.getBoundingClientRect();
+          const fRect = floor.current.getBoundingClientRect();
+          return { id: obj.id, dist: Math.abs(eleRect.top - fRect.top) };
+        });
+        return n.reduce((p, c) => (p.dist > c.dist ? c : p));
+      }
+      queue.enqueue({ id: fId, ref: floor });
+      return null;
+    },
+    [elevators]
+  );
+
+  const movingElevator = useCallback(
+    (fRef, fId, eId) => {
+      elevators[eId - 1].available = false;
       setElevators([...elevators]);
-      
       const interval = setInterval(function () {
-        moving(fRef, elevators[minObj.id - 1].ref);
+        moving(fRef, elevators[eId - 1].ref);
       }, 50);
 
       const moving = (fRef, eRef) => {
@@ -59,12 +66,14 @@ const Board = () => {
             setFloors([...floors]);
             floors[fId - 1].wait = false;
             setFloors([...floors]);
-            elevators[minObj.id - 1].available = true;
+            elevators[eId - 1].available = true;
             setElevators([...elevators]);
+            if(!queue.isEmpty()){
+              const next = queue.dequeue();
+              movingElevator(next.ref, next.id, eId);
+            }
           }, 2000);
-          return;
-        }
-        if (Math.abs(floor - ele) >= 5) {
+        } else if (Math.abs(floor - ele) >= 5) {
           eRef.current.style.transform +=
             floor > ele ? `translateY(${5}px)` : `translateY(${-5}px)`;
         } else {
@@ -75,7 +84,26 @@ const Board = () => {
         }
       };
     },
-    [elevators, floors, findElevator]
+    [elevators, floors]
+  );
+
+  const handleCall = useCallback(
+    (fRef, fId) => {
+      floors[fId - 1].wait = true;
+      setFloors([...floors]);
+      //if queue is empty find for current floor
+      //else put current last in queue and take the first in line
+      let minObj = null;
+      if (queue.isEmpty()) {
+        minObj = findElevator(fRef,fId);
+      } else {
+        queue.enqueue({ id: fId, ref: fRef });
+      }
+      if (minObj) {
+        movingElevator(fRef, fId, minObj.id);
+      }
+    },
+    [floors, findElevator, movingElevator]
   );
 
   return (
@@ -83,78 +111,25 @@ const Board = () => {
       <div className="numbers"></div>
       <table className="board">
         <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            {elevators.map((v, i) => (
-              <td key={i}>
-                <div ref={v.ref}>
-                  <Elevator id={v.id} available={v.available} />
-                </div>
-              </td>
-            ))}
-          </tr>
+          {floors.map((fVal, fInd) =>
+            fInd !== 9 ? (
+              <tr key={fInd}>
+                {elevators.map((v, i) => (
+                  <td key={i}></td>
+                ))}
+              </tr>
+            ) : (
+              <tr key={fInd}>
+                {elevators.map((eVal, eInd) => (
+                  <td key={eInd}>
+                    <div ref={eVal.ref}>
+                      <Elevator id={eVal.id} available={eVal.available} />
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            )
+          )}
         </tbody>
       </table>
       <div className="floors">
