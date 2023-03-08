@@ -1,25 +1,28 @@
 .floor_container{
     height: 8vh;
-    position: relative;
-    top:2vh;
+    
     width: 5%;
     gap:2%;
 }
-#red, #green{
+#red, #green, #arrive{
     color: white;
-    font-size: 0.7vw;
+    font-size: 0.8vw;
 
 }
 #red{
     background-color: red;
 }
 #green{
-    background-color: green;
+    background-color: rgb(21, 191, 83);
     cursor: pointer;
+    border: 1px solid rgb(21, 191, 83);
+    border-radius: 3px;
+    width: 4vw;
+
 }
 #arrive{
-    color: green;
-    border: 1px solid green;
+    color: rgb(21, 191, 83);
+    border: 1px solid rgb(21, 191, 83);
     background-color: white;
 }
 .numberOfElevators{

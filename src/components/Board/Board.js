@@ -32,7 +32,8 @@ const Board = () => {
       let availableElevators = elevators.filter(
         (obj) => obj.available === true
       );
-      floors[fId - 1].numOfElevators =(availableElevators.length>0) ? availableElevators.length: 0;
+      floors[fId - 1].numOfElevators =
+        availableElevators.length > 0 ? availableElevators.length : 0;
       setFloors([...floors]);
       if (availableElevators.length > 0) {
         let n = availableElevators.map((obj) => {
@@ -72,7 +73,7 @@ const Board = () => {
             floors[fId - 1].arrive = false;
             setFloors([...floors]);
             floors[fId - 1].wait = false;
-            floors[fId - 1].numOfElevators =-1;
+            floors[fId - 1].numOfElevators = -1;
             setFloors([...floors]);
             elevators[eId - 1].available = true;
             elevators[eId - 1].arrive = false;
@@ -118,7 +119,19 @@ const Board = () => {
 
   return (
     <div className="board_container">
-      <div className="numbers"></div>
+      <div>
+        {floors.map((fVal, fInd) =>
+          fInd !== 9 ? (
+            <div className="numbers">
+                <b>{floors.length - fInd - 1}{(fInd===8 ? 'st' : (fInd===7)? 'nd': (fInd===6)? 'rd':'th')}</b>
+            </div>
+          ) : (
+            <div className="numbers">
+              <b>Ground Floor</b>
+            </div>
+          )
+        )}
+      </div>
       <table className="board">
         <tbody>
           {floors.map((fVal, fInd) =>

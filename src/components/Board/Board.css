@@ -1,15 +1,15 @@
-.board_container{
-    display: flex;
-    margin-top: 3%;
+.board_container {
+  display: flex;
+  margin-top: 3%;
+  margin-left: 5%;
 }
 table {
   border-bottom: 1px solid lightgray;
   border-left: 1px solid lightgray;
-  margin-left: 10%;
   width: 80vw;
   height: 80vh;
 }
-tr{
+tr {
   position: relative;
 }
 
@@ -19,4 +19,9 @@ td {
   border-right: 1px solid lightgray;
   width: 20%;
   height: 10%;
+}
+.numbers {
+  height: 8.5vh;
+  gap: 2%;
+  font-size: 0.8vw;
 }
